@@ -5,6 +5,17 @@
         <title>CYOA template</title>
     </head>
     <body>
-        <p>{{.Example}}</p>
+        <!-- arc title -->
+        <h1>{{.Details.Title}}</h1>
+        <!-- paragraphs of the arc -->
+        {{range .Details.Story}}
+        <p>{{.}}</p>
+        {{end}}
+        <!-- options -->
+        <ul>
+        {{range .Details.Options}}
+        <li><a href="cyoa/{{.arc}}">{{.text}}</a></li>
+        {{end}}
+        </ul>
     </body>
 </html>

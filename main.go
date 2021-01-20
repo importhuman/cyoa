@@ -7,8 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	//"os"
-	//"strings"
 )
 
 // for unmarshalling json
@@ -18,7 +16,14 @@ type Contents struct {
 	Options []map[string]string
 }
 
-func main() {
+// struct for JSON of each arc including arc title, to be implemented in http handle
+type Webpage struct {
+	Arc     string
+	Details Contents
+}
+
+// parses JSON story
+func parseJSON() map[string]Contents {
 	// open file as byte data
 	data, err := ioutil.ReadFile("gopher.json")
 	// exit if file not opened
@@ -26,40 +31,45 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// fmt.Println(data)
-
-	// gets keys as strings, values as interfaces which need to be unmarshalled further
+	// gets keys as strings, values as type Contents
 	var obj map[string]Contents
 
 	err = json.Unmarshal(data, &obj)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// fmt.Println(obj)
-
-	// http handler
-	mux := http.NewServeMux()
-	testHandler := demo{"working from main"}
-	mux.Handle("/test", testHandler)
-
-	fmt.Println("Starting server on :8080")
-	err = http.ListenAndServe(":8080", mux)
-	if err != nil {
-		log.Fatal(err)
-	}
+	return obj
 }
 
-type demo struct {
-	Example string
-}
-
-func (d demo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (data Webpage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	parsedTemplate, err := template.ParseFiles("template.html")
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = parsedTemplate.Execute(w, d)
+	err = parsedTemplate.Execute(w, data)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func main() {
+	obj := parseJSON()
+	introContent := obj["intro"]
+
+	// http handler
+	mux := http.NewServeMux()
+
+	// handle 404 requests
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(404)
+		fmt.Fprintf(w, "No chapter found. Stop messing with the URL!")
+	})
+
+	introHandler := Webpage{"intro", introContent}
+	mux.Handle("/cyoa", introHandler)
+
+	fmt.Println("Starting server on :8080")
+	err := http.ListenAndServe(":8080", mux)
 	if err != nil {
 		log.Fatal(err)
 	}
