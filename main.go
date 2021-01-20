@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	//"os"
 	//"strings"
 )
@@ -34,5 +35,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(obj)
+	// fmt.Println(obj)
+
+	// http handler
+	mux := http.NewServeMux()
+	testHandler := demo{}
+	mux.Handle("/test", testHandler)
+
+	fmt.Println("Starting server on :8080")
+	err = http.ListenAndServe(":8080", mux)
+	log.Fatal(err)
+}
+
+type demo struct{}
+
+func (d demo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello world"))
 }
