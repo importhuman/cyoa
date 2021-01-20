@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -39,16 +40,27 @@ func main() {
 
 	// http handler
 	mux := http.NewServeMux()
-	testHandler := demo{}
+	testHandler := demo{"working from main"}
 	mux.Handle("/test", testHandler)
 
 	fmt.Println("Starting server on :8080")
 	err = http.ListenAndServe(":8080", mux)
-	log.Fatal(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-type demo struct{}
+type demo struct {
+	Example string
+}
 
 func (d demo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello world"))
+	parsedTemplate, err := template.ParseFiles("template.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = parsedTemplate.Execute(w, d)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
