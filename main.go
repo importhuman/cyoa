@@ -9,6 +9,7 @@ import (
 	//"strings"
 )
 
+// for unmarshalling json
 type Contents struct {
 	Title   string
 	Story   []string
