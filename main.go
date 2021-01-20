@@ -17,6 +17,7 @@ type Contents struct {
 }
 
 // struct for JSON of each arc including arc title, to be implemented in http handle
+// After completion of project: didn't really need this, could've done with Contents
 type Webpage struct {
 	Arc     string
 	Details Contents
@@ -46,6 +47,7 @@ func parseJSON() map[string]Contents {
 	return obj
 }
 
+// for http.Handlers
 func (data Webpage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	parsedTemplate, err := template.ParseFiles("template.html")
 	if err != nil {
@@ -58,10 +60,11 @@ func (data Webpage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	// assign result of parseJSON to obj
 	obj := parseJSON()
 	// introContent := obj["intro"]
 
-	// http handler
+	// http handler/multiplexer
 	mux := http.NewServeMux()
 
 	// handle 404 requests
