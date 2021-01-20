@@ -38,6 +38,11 @@ func parseJSON() map[string]Contents {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// to get arc names for handlers
+	// for key := range obj {
+	// 	fmt.Println(key)
+	// }
 	return obj
 }
 
@@ -54,7 +59,7 @@ func (data Webpage) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	obj := parseJSON()
-	introContent := obj["intro"]
+	// introContent := obj["intro"]
 
 	// http handler
 	mux := http.NewServeMux()
@@ -65,8 +70,22 @@ func main() {
 		fmt.Fprintf(w, "No chapter found. Stop messing with the URL!")
 	})
 
-	introHandler := Webpage{"intro", introContent}
-	mux.Handle("/cyoa", introHandler)
+	// handlers for different pages
+	intro := Webpage{"intro", obj["intro"]}
+	home := Webpage{"home", obj["home"]}
+	newyork := Webpage{"new-york", obj["new-york"]}
+	debate := Webpage{"debate", obj["debate"]}
+	seankelly := Webpage{"sean-kelly", obj["sean-kelly"]}
+	markbates := Webpage{"mark-bates", obj["mark-bates"]}
+	denver := Webpage{"denver", obj["denver"]}
+
+	mux.Handle("/cyoa/", intro)
+	mux.Handle("/cyoa/home", home)
+	mux.Handle("/cyoa/new-york", newyork)
+	mux.Handle("/cyoa/debate", debate)
+	mux.Handle("/cyoa/sean-kelly", seankelly)
+	mux.Handle("/cyoa/mark-bates", markbates)
+	mux.Handle("/cyoa/denver", denver)
 
 	fmt.Println("Starting server on :8080")
 	err := http.ListenAndServe(":8080", mux)
